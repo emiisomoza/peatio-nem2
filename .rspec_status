@@ -1,13 +1,15 @@
 example_id                                    | status | run_time        |
 --------------------------------------------- | ------ | --------------- |
-./spec/peatio/nem/blockchain_spec.rb[1:1:1]   | passed | 0.0005 seconds  |
-./spec/peatio/nem/blockchain_spec.rb[1:1:2]   | passed | 0.00099 seconds |
-./spec/peatio/nem/blockchain_spec.rb[1:1:3]   | passed | 0.00102 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:1:1]   | passed | 0.0004 seconds  |
+./spec/peatio/nem/blockchain_spec.rb[1:1:2]   | passed | 0.00079 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:1:3]   | passed | 0.00107 seconds |
 ./spec/peatio/nem/blockchain_spec.rb[1:2:1]   | passed | 0.00012 seconds |
-./spec/peatio/nem/blockchain_spec.rb[1:2:2]   | passed | 0.00013 seconds |
-./spec/peatio/nem/blockchain_spec.rb[1:3:1]   | passed | 0.00873 seconds |
-./spec/peatio/nem/blockchain_spec.rb[1:3:2]   | passed | 0.00178 seconds |
-./spec/peatio/nem/blockchain_spec.rb[1:4:1:1] | passed | 0.00031 seconds |
-./spec/peatio/nem/blockchain_spec.rb[1:4:2:1] | passed | 0.00031 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:2:2]   | passed | 0.00007 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:3:1]   | passed | 0.00857 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:3:2]   | passed | 0.00245 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:4:1:1] | passed | 0.0003 seconds  |
+./spec/peatio/nem/blockchain_spec.rb[1:4:2:1] | passed | 0.00025 seconds |
 ./spec/peatio/nem/blockchain_spec.rb[1:4:3:1] | passed | 0.00016 seconds |
-./spec/peatio/nem2_spec.rb[1:1]               | passed | 0.00044 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:5:1]   | passed | 0.00592 seconds |
+./spec/peatio/nem/blockchain_spec.rb[1:5:2]   | passed | 0.01153 seconds |
+./spec/peatio/nem2_spec.rb[1:1]               | passed | 0.00107 seconds |

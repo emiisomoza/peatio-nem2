@@ -278,4 +278,73 @@ RSpec.describe Peatio::Nem2::Blockchain do
       end
     end
   end
+
+  context :fetch_block! do
+    before(:all) { WebMock.disable_net_connect! }
+    after(:all)  { WebMock.allow_net_connect! }
+
+    let(:server) { 'http://user:password@127.0.0.1:19332' }
+    let(:server_without_authority) { 'http://127.0.0.1:19332' }
+
+    let(:getblockhash_response_file) do
+      File.join('spec', 'resources', 'getblockhash', '40500.json')
+    end
+
+    let(:getblockhash_response) do
+      getblockhash_response_file
+        .yield_self { |file_path| File.open(file_path) }
+        .yield_self { |file| JSON.load(file) }
+    end
+
+    let(:getblock_response_file) do
+      File.join('spec', 'resources', 'getblock', '40500.json')
+    end
+
+    let(:getblock_response) do
+      getblock_response_file
+        .yield_self { |file_path| File.open(file_path) }
+        .yield_self { |file| JSON.load(file) }
+    end
+
+    let(:blockchain) do
+      Peatio::Nem2::Blockchain.new.tap {|b| b.configure(server: server)}
+    end
+
+    before do
+      stub_request(:post, server_without_authority)
+        .with(body: { jsonrpc: '1.0',
+                      method: :getblockhash,
+                      params:  [40500] }.to_json)
+        .to_return(body: getblockhash_response.to_json)
+
+      stub_request(:post, server_without_authority)
+        .with(body: { jsonrpc: '1.0',
+                      method: :getblock,
+                      params:  ['5a471d4fd13d8bc3351e4d3a618fa55993326014b925346d8e9272e271e97c4e',2] }.to_json)
+        .to_return(body: getblock_response.to_json)
+    end
+
+    let(:currency) do
+      { id: :ltc,
+        base_factor: 100_000_000,
+        options: {} }
+    end
+
+    let(:server) { 'http://user:password@127.0.0.1:19332' }
+    let(:server_without_authority) { 'http://127.0.0.1:19332' }
+    let(:blockchain) do
+      Peatio::Nem2::Blockchain.new.tap { |b| b.configure(server: server, currencies: [currency]) }
+    end
+
+    subject { blockchain.fetch_block!(40500) }
+
+    it 'builds expected number of transactions' do
+      expect(subject.count).to eq(4)
+    end
+
+    it 'all transactions are valid' do
+      expect(subject.all?(&:valid?)).to be_truthy
+    end
+  end
+
 end

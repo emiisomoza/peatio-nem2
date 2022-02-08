@@ -50,6 +50,20 @@ module Peatio
         end
       end
 
+      def fetch_block!(block_number)
+        block_hash = client.json_rpc(:getblockhash, [block_number])
+
+        client.json_rpc(:getblock, [block_hash, 2])
+          .fetch('tx').each_with_object([]) do |tx, txs_array|
+          txs = build_transaction(tx).map do |ntx|
+            Peatio::Transaction.new(ntx.merge(block_number: block_number))
+          end
+          txs_array.append(*txs)
+        end.yield_self { |txs_array| Peatio::Block.new(block_number, txs_array) }
+      rescue Client::Error => e
+        raise Peatio::Blockchain::ClientError, e
+      end
+
     end
   end
 end
