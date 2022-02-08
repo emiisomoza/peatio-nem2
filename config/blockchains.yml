@@ -1,7 +1,7 @@
 - key:               testnet
   name:              Nem Testnet
   client:            nem                                  # API client name.
-  server:            http://user:password@127.0.0.1:7890  # Public Litecoin node endpoint.
+  server:            http://127.0.0.1:7890                # Public Nem node endpoint.
   height:            3487157                              # Initial block number from which sync will be started.
   min_confirmations: 6                                    # Minimal confirmations needed for withdraw and deposit confirmation.
   explorer:
