@@ -3,5 +3,6 @@ module Peatio
     class Error < StandardError; end
     require "peatio/nem2/version"
     require "peatio/nem2/blockchain"
+    require "peatio/nem2/client"
   end
 end

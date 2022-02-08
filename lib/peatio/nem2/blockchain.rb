@@ -16,6 +16,21 @@ module Peatio
         @client = nil
         @settings.merge!(settings.slice(*SUPPORTED_SETTINGS))
       end
+
+      def latest_block_number
+        client.json_rpc(:getblockcount)
+      rescue Client::Error => e
+        raise Peatio::Blockchain::ClientError, e
+      end
+
+      def client
+        @client ||= Client.new(settings_fetch(:server))
+      end
+
+      def settings_fetch(key)
+        @settings.fetch(key) { raise Peatio::Blockchain::MissingSettingError, key.to_s }
+      end
+
     end
   end
 end
