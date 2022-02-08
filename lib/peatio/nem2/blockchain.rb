@@ -1,4 +1,3 @@
-require 'peatio' 
 module Peatio
   module Nem2
     # TODO: Processing of unconfirmed transactions from mempool isn't supported now.
@@ -29,6 +28,26 @@ module Peatio
 
       def settings_fetch(key)
         @settings.fetch(key) { raise Peatio::Blockchain::MissingSettingError, key.to_s }
+      end
+
+      def build_transaction(tx_hash)
+        tx_hash.fetch('vout')
+          .select do |entry|
+          entry.fetch('value').to_d > 0 &&
+            entry['scriptPubKey'].has_key?('addresses')
+        end
+          .each_with_object([]) do |entry, formatted_txs|
+          no_currency_tx =
+            { hash: tx_hash['txid'], txout: entry['n'],
+              to_address: entry['scriptPubKey']['addresses'][0],
+              amount: entry.fetch('value').to_d,
+              status: 'success' }
+
+          # Build transaction for each currency belonging to blockchain.
+          settings_fetch(:currencies).pluck(:id).each do |currency_id|
+            formatted_txs << no_currency_tx.merge(currency_id: currency_id)
+          end
+        end
       end
 
     end

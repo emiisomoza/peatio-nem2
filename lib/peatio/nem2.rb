@@ -1,3 +1,6 @@
+require "active_support/core_ext/enumerable"
+require "peatio"
+
 module Peatio
   module Nem2
     class Error < StandardError; end
