@@ -283,8 +283,8 @@ RSpec.describe Peatio::Nem2::Blockchain do
     before(:all) { WebMock.disable_net_connect! }
     after(:all)  { WebMock.allow_net_connect! }
 
-    let(:server) { 'http://user:password@127.0.0.1:19332' }
-    let(:server_without_authority) { 'http://127.0.0.1:19332' }
+    let(:server) { 'http://user:password@127.0.0.1:7890' }
+    let(:server_without_authority) { 'http://127.0.0.1:7890' }
 
     let(:getblockhash_response_file) do
       File.join('spec', 'resources', 'getblockhash', '40500.json')
@@ -330,8 +330,8 @@ RSpec.describe Peatio::Nem2::Blockchain do
         options: {} }
     end
 
-    let(:server) { 'http://user:password@127.0.0.1:19332' }
-    let(:server_without_authority) { 'http://127.0.0.1:19332' }
+    let(:server) { 'http://user:password@127.0.0.1:7890' }
+    let(:server_without_authority) { 'http://127.0.0.1:7890' }
     let(:blockchain) do
       Peatio::Nem2::Blockchain.new.tap { |b| b.configure(server: server, currencies: [currency]) }
     end
@@ -344,6 +344,77 @@ RSpec.describe Peatio::Nem2::Blockchain do
 
     it 'all transactions are valid' do
       expect(subject.all?(&:valid?)).to be_truthy
+    end
+  end
+
+  context :load_balance_of_address! do
+    before(:all) { WebMock.disable_net_connect! }
+    after(:all)  { WebMock.allow_net_connect! }
+
+    let(:server) { 'http://user:password@127.0.0.1:7890' }
+    let(:server_without_authority) { 'http://127.0.0.1:7890' }
+
+    let(:response) do
+      response_file
+        .yield_self { |file_path| File.open(file_path) }
+        .yield_self { |file| JSON.load(file) }
+    end
+
+    let(:response_file) do
+      File.join('spec', 'resources', 'listaddressgroupings', 'response.json')
+    end
+
+    let(:blockchain) do
+      Peatio::Nem2::Blockchain.new.tap {|b| b.configure(server: server)}
+    end
+
+    before do
+      stub_request(:post, server_without_authority)
+        .with(body: { jsonrpc: '1.0',
+                      method: :listaddressgroupings,
+                      params:  [] }.to_json)
+        .to_return(body: response.to_json)
+    end
+
+    context 'address with balance is defined' do
+      it 'requests rpc listaddressgroupings and finds address balance' do
+        address = 'QQggiZZSU1qTibRfK5RBgXSeBT71Ek7fLe'
+
+        result = blockchain.load_balance_of_address!(address, :ltc)
+        expect(result).to be_a(BigDecimal)
+        expect(result).to eq('0.99983359'.to_d)
+      end
+
+      it 'requests rpc listaddressgroupings and finds address with zero balance' do
+        address = 'QRnrwkUBQ2E4ZJ3bj8jvn4Nwx4nJ2U7wXF'
+
+        result = blockchain.load_balance_of_address!(address, :ltc)
+        expect(result).to be_a(BigDecimal)
+        expect(result).to eq('0'.to_d)
+      end
+    end
+
+    context 'address is not defined' do
+      it 'requests rpc listaddressgroupings and do not find address' do
+        address = 'LLgJTbzZMsRTCUF1NtvvL9SR1a4pVieW89'
+        expect{ blockchain.load_balance_of_address!(address, :ltc)}.to raise_error(Peatio::Blockchain::UnavailableAddressBalanceError)
+      end
+    end
+
+    context 'client error is raised' do
+      before do
+        stub_request(:post, 'http://127.0.0.1:7890')
+          .with(body: { jsonrpc: '1.0',
+                        method: :listaddressgroupings,
+                        params: [] }.to_json)
+          .to_return(body: { result: nil,
+                             error:  { code: -32601, message: 'Method not found' },
+                             id:     nil }.to_json)
+      end
+
+      it 'raise wrapped client error' do
+        expect{ blockchain.load_balance_of_address!('anything', :ltc)}.to raise_error(Peatio::Blockchain::ClientError)
+      end
     end
   end
 

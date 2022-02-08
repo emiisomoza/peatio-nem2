@@ -60,8 +60,22 @@ module Peatio
           end
           txs_array.append(*txs)
         end.yield_self { |txs_array| Peatio::Block.new(block_number, txs_array) }
-      rescue Client::Error => e
-        raise Peatio::Blockchain::ClientError, e
+        rescue Client::Error => e
+          raise Peatio::Blockchain::ClientError, e
+      end
+
+      def load_balance_of_address!(address, _currency_id)
+        address_with_balance = client.json_rpc(:listaddressgroupings)
+                                 .flatten(1)
+                                 .find { |addr| addr[0] == address }
+
+        if address_with_balance.blank?
+          raise Peatio::Blockchain::UnavailableAddressBalanceError, address
+        end
+
+        address_with_balance[1].to_d
+        rescue Client::Error => e
+          raise Peatio::Blockchain::ClientError, e
       end
 
     end
